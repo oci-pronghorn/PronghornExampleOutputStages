@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+
+     <!--  Message for sending simple MQTT  -->
+     
+   <template name="MQTTMsg" id="100" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+     <string name="serverURI" id="110"/>
+     <string name="clientid" id="111"/>
+     <int32 name="index" id="112"/>
+     <string name="topic" id="120"/>
+     <bytevector name="payload" id="121"/>    
+     <uInt32 name="qos" id="122"/>
+   </template>
+
+    <!-- 
+        Message for a feed that looks like:    
+        Symbol, Company Name, , Open, High, Low, Last, Volume
+        
+        Example row:
+        AAI,Airtran Holdings Inc,,7.4,7.42,7.4,7.4,1710705
+    -->
+
+	<template name="DailyQuoteMsg" id="10000" xmlns="http://www.fixprotocol.org/ns/fast/td/1.1">
+	    <string name="Symbol" id="4"/>
+	    <string name="Company Name" id="84"/>
+	    <string name="Optional Additional I18N Note" id="103" presence="optional" charset="unicode"/>
+	    <decimal name="Open Price" id="118" />
+	    <decimal name="High Price" id="134" />
+	    <decimal name="Low Price" id="150" />
+	    <decimal name="Closed Price" id="166" />
+	    <uInt64 name="Volume" id="178"/>
+	</template>
+   
+
+
+</templates>

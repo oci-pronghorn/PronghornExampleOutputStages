@@ -1,0 +1,150 @@
+package com.ociweb.pronghorn.exampleStages;
+
+import java.nio.ByteBuffer;
+
+import com.ociweb.pronghorn.ring.FieldReferenceOffsetManager;
+import com.ociweb.pronghorn.ring.RingBuffer;
+import com.ociweb.pronghorn.ring.stream.StreamingConsumer;
+import com.ociweb.pronghorn.ring.stream.StreamingConsumerAdapter;
+import com.ociweb.pronghorn.ring.stream.StreamingConsumerReader;
+import com.ociweb.pronghorn.stage.PronghornStage;
+import com.ociweb.pronghorn.stage.scheduling.GraphManager;
+
+public class OutputStageStreamingConsumerExample extends PronghornStage {
+
+	private final class ExampleVisitor extends StreamingConsumerAdapter {
+		
+		private final FauxDatabase databaseConnection;
+		private final StringBuilder serverURIBuilder = new StringBuilder();
+		private final StringBuilder clientIdBuilder = new StringBuilder();
+		private final StringBuilder topicIBuilder = new StringBuilder();
+				
+		private final FieldReferenceOffsetManager from;		
+		
+		public ExampleVisitor(FauxDatabase databaseConnection, FieldReferenceOffsetManager from ) {
+			this.databaseConnection = databaseConnection;
+			this.from = from;
+			
+		}
+
+
+		@Override
+		public void visitTemplateOpen(String name, long id) {
+			databaseConnection.writeMessageId(0);//FieldReferenceOffsetManager.lookupTemplateLocator(id, from));
+		}
+		
+		@Override
+		public void visitBytes(String name, long id, ByteBuffer value) {			
+			value.flip();
+			databaseConnection.writePayload(value);
+		}
+
+		@Override
+		public void visitSignedInteger(String string, long id, int value) {
+			databaseConnection.writeClientIdIdx(value);
+		}
+
+		@Override
+		public void visitUnsignedInteger(String string, long id, long value) {
+			databaseConnection.writeQOS((int)value);
+		}
+
+		@Override
+		public Appendable targetASCII(String name, long id) {
+				switch((int)id) {
+				case 110:
+					serverURIBuilder.setLength(0);
+					return serverURIBuilder;
+				case 111:
+					clientIdBuilder.setLength(0);
+					return clientIdBuilder;
+				case 120:
+					topicIBuilder.setLength(0);
+					return topicIBuilder;
+				default:
+					return super.targetASCII(name, id);
+			}
+		}
+
+		
+		@Override
+		public void visitASCII(String name, long id, Appendable value) {
+		   
+			switch((int)id) {
+				case 110:
+					databaseConnection.writeServerURI((CharSequence)value);
+					break;
+				case 111:
+					databaseConnection.writeClientId((CharSequence)value);
+					break;					
+				case 120:
+					databaseConnection.writeTopic((CharSequence)value);
+					break;
+			}
+		}
+	}
+
+	private final FauxDatabase databaseConnection;
+	private final RingBuffer input;
+	
+	private StreamingConsumer visitor;
+	private StreamingConsumerReader reader;
+	private FieldReferenceOffsetManager from;
+	
+	
+	protected OutputStageStreamingConsumerExample(GraphManager graphManager, FauxDatabase databaseConnection, RingBuffer input) {
+		super(graphManager, input, NONE);
+		this.input = input;
+		this.databaseConnection = databaseConnection;
+		
+	}
+
+	@Override
+	public void startup() {
+		super.startup();		
+		
+		try{
+			
+			from = RingBuffer.from(input);
+			visitor = new ExampleVisitor(databaseConnection,  from);
+						
+			reader = new StreamingConsumerReader(input, visitor );
+			
+		    ///////
+			//PUT YOUR LOGIC HERE FOR CONNTECTING TO THE DATABASE OR OTHER TARGET FOR INFORMATION
+			//////
+			
+			reader.startup();
+								
+		} catch (Throwable t) {
+			throw new RuntimeException(t);
+		}
+	}
+	
+	
+	@Override
+	public void run() {
+		reader.run();
+	}
+	
+
+	@Override
+	public void shutdown() {
+		
+		try{
+			reader.shutdown();
+			
+		    ///////
+			//PUT YOUR LOGIC HERE TO CLOSE CONNECTIONS FROM THE DATABASE OR OTHER TARGET OF INFORMATION
+			//////
+			
+		} catch (Throwable t) {
+			throw new RuntimeException(t);
+		} finally {		
+			//call the super.shutdown() last so that any watchers know when this has really stopped
+			super.shutdown();
+		}
+	}
+
+
+}
