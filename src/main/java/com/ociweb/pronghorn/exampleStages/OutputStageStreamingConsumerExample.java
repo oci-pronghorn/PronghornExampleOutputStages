@@ -19,12 +19,9 @@ public class OutputStageStreamingConsumerExample extends PronghornStage {
 		private final StringBuilder clientIdBuilder = new StringBuilder();
 		private final StringBuilder topicIBuilder = new StringBuilder();
 				
-		private final FieldReferenceOffsetManager from;		
-		
 		public ExampleVisitor(FauxDatabase databaseConnection, FieldReferenceOffsetManager from ) {
 			this.databaseConnection = databaseConnection;
-			this.from = from;
-			
+	
 		}
 
 

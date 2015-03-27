@@ -9,7 +9,7 @@ import static com.ociweb.pronghorn.ring.RingBuffer.confirmLowLevelWrite;
 import static com.ociweb.pronghorn.ring.RingBuffer.initLowLevelWriter;
 import static com.ociweb.pronghorn.ring.RingBuffer.publishWrites;
 import static com.ociweb.pronghorn.ring.RingBuffer.roomToLowLevelWrite;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
@@ -134,6 +134,17 @@ public class PipelineTest {
 		
 	}
 	
+//	long start = System.currentTimeMillis(); //TODO: need a single threaded scheduler for testing. looks a little like this.
+//	out1.startup();
+//	generator.startup();
+//	int x = 100000000;
+//	while (--x>=0) {
+//		generator.run();
+//		out1.run();
+//	}
+//	reportResults(ringBuffer, "hack test", System.currentTimeMillis()-start, checker1);
+	
+	
 	@Test
 	public void streamingConsumerOutputStageTest() {
 				
@@ -151,6 +162,8 @@ public class PipelineTest {
 		FauxDatabase checker4 = new FauxDatabaseChecker();
 				
 		GenerateTestDataStage generator = new GenerateTestDataStage(gm, ringBuffer);
+		
+		//OutputStageStreamingConsumerExample out1 = new OutputStageStreamingConsumerExample(gm, checker1, ringBuffer);
 		
 		RoundRobinRouteStage router = new RoundRobinRouteStage(gm, ringBuffer, ringBuffer1, ringBuffer2, ringBuffer3, ringBuffer4);
 				
@@ -188,17 +201,26 @@ public class PipelineTest {
 		scheduler.shutdown();
 		
         boolean cleanExit = scheduler.awaitTermination(TIMEOUT_SECONDS, TimeUnit.SECONDS);       
+        long duration = System.currentTimeMillis()-startTime;
         
-        long messages=0;
+        long messages = reportResults(ringBuffer, label, duration, checker);
+		
+		//assertTrue("RingBuffer: "+ringBuffer, cleanExit);
+	
+		return messages;
+	}
+
+
+	private long reportResults(RingBuffer ringBuffer, String label,
+			long duration, FauxDatabase... checker) {
+		long messages=0;
         long bytes=0;
         int i = checker.length;
         while (--i>=0) {
         	messages += checker[i].totalMessagesCount();
         	bytes += checker[i].totalBytesCount();
-        }
-        
+        }        
 				
-		long duration = System.currentTimeMillis()-startTime;
 		if (0!=duration) {
 			
 			long bytesMoved = (4*RingBuffer.headPosition(ringBuffer))+bytes;
@@ -210,9 +232,6 @@ public class PipelineTest {
 					           label
 							  );
 		}
-		
-		//assertTrue("RingBuffer: "+ringBuffer, cleanExit);
-	
 		return messages;
 	}
 	
@@ -323,7 +342,9 @@ public class PipelineTest {
 			totalBytes+=j;
 			assertEquals(topic.length(),value.length());			
 			while (--j>=0) {
-				assertEquals(topic.charAt(j), value.charAt(j));
+				if (topic.charAt(j)!=value.charAt(j)) {
+					assertEquals(topic, value.toString());
+				};
 			}
 		}
 
@@ -333,7 +354,9 @@ public class PipelineTest {
 			totalBytes+=j;
 			assertEquals(clientId.length(),value.length());			
 			while (--j>=0) {
-				assertEquals(clientId.charAt(j), value.charAt(j));
+				if (clientId.charAt(j)!=value.charAt(j)) {
+					assertEquals(clientId, value.toString());
+				};
 			}
 		}
 
@@ -343,7 +366,9 @@ public class PipelineTest {
 			totalBytes+=j;
 			assertEquals(serverURI.length(),value.length());
 			while (--j>=0) {
-				assertEquals(serverURI.charAt(j), value.charAt(j));
+				if (serverURI.charAt(j)!=value.charAt(j)) {
+					assertEquals(serverURI, value.toString());
+				};
 			}
 		}
 
