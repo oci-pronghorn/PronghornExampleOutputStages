@@ -4,15 +4,15 @@ import java.nio.ByteBuffer;
 
 import com.ociweb.pronghorn.ring.FieldReferenceOffsetManager;
 import com.ociweb.pronghorn.ring.RingBuffer;
-import com.ociweb.pronghorn.ring.stream.StreamingConsumer;
-import com.ociweb.pronghorn.ring.stream.StreamingConsumerAdapter;
-import com.ociweb.pronghorn.ring.stream.StreamingConsumerReader;
+import com.ociweb.pronghorn.ring.stream.StreamingReadVisitor;
+import com.ociweb.pronghorn.ring.stream.StreamingReadVisitorAdapter;
+import com.ociweb.pronghorn.ring.stream.StreamingVisitorReader;
 import com.ociweb.pronghorn.stage.PronghornStage;
 import com.ociweb.pronghorn.stage.scheduling.GraphManager;
 
-public class OutputStageStreamingConsumerExample extends PronghornStage {
+public class OutputStageStreamingVisitorExample extends PronghornStage {
 
-	private final class ExampleVisitor extends StreamingConsumerAdapter {
+	private final class ExampleVisitor extends StreamingReadVisitorAdapter {
 		
 		private final FauxDatabase databaseConnection;
 		private final StringBuilder serverURIBuilder = new StringBuilder();
@@ -84,12 +84,12 @@ public class OutputStageStreamingConsumerExample extends PronghornStage {
 	private final FauxDatabase databaseConnection;
 	private final RingBuffer input;
 	
-	private StreamingConsumer visitor;
-	private StreamingConsumerReader reader;
+	private StreamingReadVisitor visitor;
+	private StreamingVisitorReader reader;
 	private FieldReferenceOffsetManager from;
 	
 	
-	protected OutputStageStreamingConsumerExample(GraphManager graphManager, FauxDatabase databaseConnection, RingBuffer input) {
+	protected OutputStageStreamingVisitorExample(GraphManager graphManager, FauxDatabase databaseConnection, RingBuffer input) {
 		super(graphManager, input, NONE);
 		this.input = input;
 		this.databaseConnection = databaseConnection;
@@ -105,7 +105,7 @@ public class OutputStageStreamingConsumerExample extends PronghornStage {
 			from = RingBuffer.from(input);
 			visitor = new ExampleVisitor(databaseConnection,  from);
 						
-			reader = new StreamingConsumerReader(input, visitor );
+			reader = new StreamingVisitorReader(input, visitor );
 			
 		    ///////
 			//PUT YOUR LOGIC HERE FOR CONNTECTING TO THE DATABASE OR OTHER TARGET FOR INFORMATION

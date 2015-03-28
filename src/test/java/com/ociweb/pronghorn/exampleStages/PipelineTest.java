@@ -38,12 +38,25 @@ public class PipelineTest {
 	public static final int messagesOnRing = 2000;
 	public static final int monitorMessagesOnRing = 7;
 	
-	private static final int maxLengthVarField = 40;
+	private static final int maxLengthVarField = 256;
 	
 	private final Integer monitorRate = Integer.valueOf(50000000);
 	
 	private static RingBufferConfig ringBufferConfig;
 	private static RingBufferConfig ringBufferMonitorConfig;
+	
+	public static String serverURI = "tcp://localhost:1883";
+	public static String clientId = "thingFortytwo";
+	public static String topic = "root/colors/blue";
+	public static byte[] payload;
+	static {
+		int payloadSize = 128;
+		payload = new byte[payloadSize];
+		int i = payloadSize;
+		while (--i>=0) {
+			payload[i]=(byte)i;
+		}
+	}
 
 	@BeforeClass
 	public static void loadSchema() {
@@ -134,19 +147,10 @@ public class PipelineTest {
 		
 	}
 	
-//	long start = System.currentTimeMillis(); //TODO: need a single threaded scheduler for testing. looks a little like this.
-//	out1.startup();
-//	generator.startup();
-//	int x = 100000000;
-//	while (--x>=0) {
-//		generator.run();
-//		out1.run();
-//	}
-//	reportResults(ringBuffer, "hack test", System.currentTimeMillis()-start, checker1);
-	
+
 	
 	@Test
-	public void streamingConsumerOutputStageTest() {
+	public void streamingVisitorOutputStageTest() {
 				
 		RingBuffer ringBuffer = new RingBuffer(ringBufferConfig);
 		RingBuffer ringBuffer1 = new RingBuffer(ringBufferConfig);
@@ -167,10 +171,10 @@ public class PipelineTest {
 		
 		RoundRobinRouteStage router = new RoundRobinRouteStage(gm, ringBuffer, ringBuffer1, ringBuffer2, ringBuffer3, ringBuffer4);
 				
-		OutputStageStreamingConsumerExample out1 = new OutputStageStreamingConsumerExample(gm, checker1, ringBuffer1);
-		OutputStageStreamingConsumerExample out2 = new OutputStageStreamingConsumerExample(gm, checker2, ringBuffer2);
-		OutputStageStreamingConsumerExample out3 = new OutputStageStreamingConsumerExample(gm, checker3, ringBuffer3);
-		OutputStageStreamingConsumerExample out4 = new OutputStageStreamingConsumerExample(gm, checker4, ringBuffer4);
+		OutputStageStreamingVisitorExample out1 = new OutputStageStreamingVisitorExample(gm, checker1, ringBuffer1);
+		OutputStageStreamingVisitorExample out2 = new OutputStageStreamingVisitorExample(gm, checker2, ringBuffer2);
+		OutputStageStreamingVisitorExample out3 = new OutputStageStreamingVisitorExample(gm, checker3, ringBuffer3);
+		OutputStageStreamingVisitorExample out4 = new OutputStageStreamingVisitorExample(gm, checker4, ringBuffer4);
 
 		//Turn on monitoring
 		GraphManager.addAnnotation(gm, GraphManager.SCHEDULE_RATE, monitorRate, new MonitorConsoleStage(gm, GraphManager.attachMonitorsToGraph(gm, monitorRate, ringBufferMonitorConfig)));	
@@ -182,6 +186,40 @@ public class PipelineTest {
 		
 	}
 	
+	@Test
+	public void eventProducerOutputStageTest() {
+				
+		RingBuffer ringBuffer = new RingBuffer(ringBufferConfig);
+		RingBuffer ringBuffer1 = new RingBuffer(ringBufferConfig);
+		RingBuffer ringBuffer2 = new RingBuffer(ringBufferConfig);
+		RingBuffer ringBuffer3 = new RingBuffer(ringBufferConfig);
+		RingBuffer ringBuffer4 = new RingBuffer(ringBufferConfig);
+						
+   	    GraphManager gm = new GraphManager();
+							
+		FauxDatabase checker1 = new FauxDatabaseChecker();
+		FauxDatabase checker2 = new FauxDatabaseChecker();
+		FauxDatabase checker3 = new FauxDatabaseChecker();
+		FauxDatabase checker4 = new FauxDatabaseChecker();
+				
+		GenerateTestDataStage generator = new GenerateTestDataStage(gm, ringBuffer);
+				
+		RoundRobinRouteStage router = new RoundRobinRouteStage(gm, ringBuffer, ringBuffer1, ringBuffer2, ringBuffer3, ringBuffer4);
+				
+		OutputStageEventProducerExample out1 = new OutputStageEventProducerExample(gm, checker1, ringBuffer1);
+		OutputStageEventProducerExample out2 = new OutputStageEventProducerExample(gm, checker2, ringBuffer2);
+		OutputStageEventProducerExample out3 = new OutputStageEventProducerExample(gm, checker3, ringBuffer3);
+		OutputStageEventProducerExample out4 = new OutputStageEventProducerExample(gm, checker4, ringBuffer4);
+
+		//Turn on monitoring
+		GraphManager.addAnnotation(gm, GraphManager.SCHEDULE_RATE, monitorRate, new MonitorConsoleStage(gm, GraphManager.attachMonitorsToGraph(gm, monitorRate, ringBufferMonitorConfig)));	
+		
+		//Enable batching
+		GraphManager.enableBatching(gm);
+
+		timeAndRunTest(ringBuffer, gm, " EventProducer", checker1, checker2, checker3, checker4);   
+		
+	}
 	
 	private long timeAndRunTest(RingBuffer ringBuffer, GraphManager gm, String label, FauxDatabase  ... checker) {
 		StageScheduler scheduler = new ThreadPerStageScheduler(GraphManager.cloneAll(gm));
@@ -235,10 +273,7 @@ public class PipelineTest {
 		return messages;
 	}
 	
-	public static String serverURI = "tcp://localhost:1883";
-	public static String clientId = "thingFortytwo";
-	public static String topic = "root/colors/blue";
-	public static byte[] payload = new byte[]{0,1,2,3,4,5,6,7};
+
 	
 	private final class FauxDatabaseChecker implements FauxDatabase {
 		long totalMessages;
