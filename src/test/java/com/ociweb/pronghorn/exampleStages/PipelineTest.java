@@ -103,7 +103,7 @@ public class PipelineTest {
 		OutputStageLowLevelExample out4 = new OutputStageLowLevelExample(gm, checker4, ringBuffer4);
 
 		//Turn on monitoring
-		GraphManager.addAnnotation(gm, GraphManager.SCHEDULE_RATE, monitorRate, new MonitorConsoleStage(gm, GraphManager.attachMonitorsToGraph(gm, monitorRate, ringBufferMonitorConfig)));	
+		MonitorConsoleStage.attach(gm, monitorRate, ringBufferMonitorConfig);	
 		
 		//Enable batching
 		GraphManager.enableBatching(gm);
@@ -138,7 +138,7 @@ public class PipelineTest {
 		OutputStageHighLevelExample out4 = new OutputStageHighLevelExample(gm, checker4, ringBuffer4);
 
 		//Turn on monitoring
-		GraphManager.addAnnotation(gm, GraphManager.SCHEDULE_RATE, monitorRate, new MonitorConsoleStage(gm, GraphManager.attachMonitorsToGraph(gm, monitorRate, ringBufferMonitorConfig)));	
+		MonitorConsoleStage.attach(gm, monitorRate, ringBufferMonitorConfig);
 		
 		//Enable batching
 		GraphManager.enableBatching(gm);
@@ -177,12 +177,12 @@ public class PipelineTest {
 		OutputStageStreamingVisitorExample out4 = new OutputStageStreamingVisitorExample(gm, checker4, ringBuffer4);
 
 		//Turn on monitoring
-		GraphManager.addAnnotation(gm, GraphManager.SCHEDULE_RATE, monitorRate, new MonitorConsoleStage(gm, GraphManager.attachMonitorsToGraph(gm, monitorRate, ringBufferMonitorConfig)));	
+		MonitorConsoleStage.attach(gm, monitorRate, ringBufferMonitorConfig);
 		
 		//Enable batching
 		GraphManager.enableBatching(gm);
 
-		timeAndRunTest(ringBuffer, gm, " StreamingConsumer", checker1, checker2, checker3, checker4);   
+		timeAndRunTest(ringBuffer, gm, " StreamingVisitor", checker1, checker2, checker3, checker4);   
 		
 	}
 	
@@ -212,10 +212,10 @@ public class PipelineTest {
 		OutputStageEventProducerExample out4 = new OutputStageEventProducerExample(gm, checker4, ringBuffer4);
 
 		//Turn on monitoring
-		GraphManager.addAnnotation(gm, GraphManager.SCHEDULE_RATE, monitorRate, new MonitorConsoleStage(gm, GraphManager.attachMonitorsToGraph(gm, monitorRate, ringBufferMonitorConfig)));	
+		MonitorConsoleStage.attach(gm, monitorRate, ringBufferMonitorConfig);
 		
 		//Enable batching
-		GraphManager.enableBatching(gm);
+		GraphManager.enableBatching(gm); //TODO: NOTE this is batching our monitors and we dont want that!!
 
 		timeAndRunTest(ringBuffer, gm, " EventProducer", checker1, checker2, checker3, checker4);   
 		
