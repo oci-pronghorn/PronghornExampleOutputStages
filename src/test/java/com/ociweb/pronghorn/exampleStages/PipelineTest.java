@@ -31,7 +31,7 @@ import com.ociweb.pronghorn.stage.scheduling.ThreadPerStageScheduler;
 
 public class PipelineTest {
 
-	static final long TIMEOUT_SECONDS = 3;
+	static final long TIMEOUT_SECONDS = 12;
 	static final long TEST_LENGTH_IN_SECONDS = 7;
 	
 	private static FieldReferenceOffsetManager from;
@@ -238,12 +238,12 @@ public class PipelineTest {
 		//
 		scheduler.shutdown();
 		
-        boolean cleanExit = scheduler.awaitTermination(TIMEOUT_SECONDS, TimeUnit.SECONDS);       
+        boolean cleanExit = scheduler.awaitTermination(TIMEOUT_SECONDS, TimeUnit.SECONDS);     
+        assertTrue(cleanExit);
         long duration = System.currentTimeMillis()-startTime;
         
         long messages = reportResults(ringBuffer, label, duration, checker);
 		
-		//assertTrue("RingBuffer: "+ringBuffer, cleanExit);
 	
 		return messages;
 	}

@@ -149,10 +149,7 @@ public class OutputStageLowLevelExample extends PronghornStage {
 			
 		} catch (Throwable t) {
 			throw new RuntimeException(t);
-		} finally {		
-			//call the super.shutdown() last so that any watchers know when this has really stopped
-			super.shutdown();
-		}
+		} 
 	}
 	
 	
