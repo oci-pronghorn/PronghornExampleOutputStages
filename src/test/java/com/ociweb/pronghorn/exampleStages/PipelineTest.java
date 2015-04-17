@@ -20,12 +20,14 @@ import org.junit.Test;
 import com.ociweb.pronghorn.ring.FieldReferenceOffsetManager;
 import com.ociweb.pronghorn.ring.RingBuffer;
 import com.ociweb.pronghorn.ring.RingBufferConfig;
+import static com.ociweb.pronghorn.ring.RingBufferConfig.*;
 import com.ociweb.pronghorn.ring.loader.TemplateHandler;
 import com.ociweb.pronghorn.stage.PronghornStage;
 import com.ociweb.pronghorn.stage.monitor.MonitorConsoleStage;
 import com.ociweb.pronghorn.stage.monitor.MonitorFROM;
 import com.ociweb.pronghorn.stage.route.RoundRobinRouteStage;
 import com.ociweb.pronghorn.stage.scheduling.GraphManager;
+import static com.ociweb.pronghorn.stage.scheduling.GraphManager.*;
 import com.ociweb.pronghorn.stage.scheduling.StageScheduler;
 import com.ociweb.pronghorn.stage.scheduling.ThreadPerStageScheduler;
 
@@ -188,13 +190,7 @@ public class PipelineTest {
 	
 	@Test
 	public void eventProducerOutputStageTest() {
-				
-		RingBuffer ringBuffer = new RingBuffer(ringBufferConfig);
-		RingBuffer ringBuffer1 = new RingBuffer(ringBufferConfig);
-		RingBuffer ringBuffer2 = new RingBuffer(ringBufferConfig);
-		RingBuffer ringBuffer3 = new RingBuffer(ringBufferConfig);
-		RingBuffer ringBuffer4 = new RingBuffer(ringBufferConfig);
-						
+										
    	    GraphManager gm = new GraphManager();
 							
 		FauxDatabase checker1 = new FauxDatabaseChecker();
@@ -202,14 +198,18 @@ public class PipelineTest {
 		FauxDatabase checker3 = new FauxDatabaseChecker();
 		FauxDatabase checker4 = new FauxDatabaseChecker();
 				
-		GenerateTestDataStage generator = new GenerateTestDataStage(gm, ringBuffer);
+		GenerateTestDataStage generator = new GenerateTestDataStage(gm, pipe(ringBufferConfig));
 				
-		RoundRobinRouteStage router = new RoundRobinRouteStage(gm, ringBuffer, ringBuffer1, ringBuffer2, ringBuffer3, ringBuffer4);
+		RoundRobinRouteStage router = new RoundRobinRouteStage(gm, getOutputPipe(gm, generator,1), 
+		                                                        pipe(ringBufferConfig),
+		                                                        pipe(ringBufferConfig),
+		                                                        pipe(ringBufferConfig),
+		                                                        pipe(ringBufferConfig));
 				
-		OutputStageEventProducerExample out1 = new OutputStageEventProducerExample(gm, checker1, ringBuffer1);
-		OutputStageEventProducerExample out2 = new OutputStageEventProducerExample(gm, checker2, ringBuffer2);
-		OutputStageEventProducerExample out3 = new OutputStageEventProducerExample(gm, checker3, ringBuffer3);
-		OutputStageEventProducerExample out4 = new OutputStageEventProducerExample(gm, checker4, ringBuffer4);
+		OutputStageEventProducerExample out1 = new OutputStageEventProducerExample(gm, checker1, getOutputPipe(gm, router, 1));
+		OutputStageEventProducerExample out2 = new OutputStageEventProducerExample(gm, checker2, getOutputPipe(gm, router, 2));
+		OutputStageEventProducerExample out3 = new OutputStageEventProducerExample(gm, checker3, getOutputPipe(gm, router, 3));
+		OutputStageEventProducerExample out4 = new OutputStageEventProducerExample(gm, checker4, getOutputPipe(gm, router, 4));
 
 		//Turn on monitoring
 		MonitorConsoleStage.attach(gm, monitorRate, ringBufferMonitorConfig);
@@ -217,7 +217,7 @@ public class PipelineTest {
 		//Enable batching
 		GraphManager.enableBatching(gm); //TODO: NOTE this is batching our monitors and we dont want that!!
 
-		timeAndRunTest(ringBuffer, gm, " EventProducer", checker1, checker2, checker3, checker4);   
+		timeAndRunTest(getOutputPipe(gm, generator,1), gm, " EventProducer", checker1, checker2, checker3, checker4);   
 		
 	}
 	
