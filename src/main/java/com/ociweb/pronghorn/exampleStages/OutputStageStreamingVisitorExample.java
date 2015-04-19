@@ -81,8 +81,6 @@ public class OutputStageStreamingVisitorExample extends PronghornStage {
 		}
 	}
 
-	private final FauxDatabase databaseConnection;
-	private final RingBuffer input;
 	
 	private StreamingReadVisitor visitor;
 	private StreamingVisitorReader reader;
@@ -91,27 +89,25 @@ public class OutputStageStreamingVisitorExample extends PronghornStage {
 	
 	protected OutputStageStreamingVisitorExample(GraphManager graphManager, FauxDatabase databaseConnection, RingBuffer input) {
 		super(graphManager, input, NONE);
-		this.input = input;
-		this.databaseConnection = databaseConnection;
+
+		from = RingBuffer.from(input);
+		visitor = new ExampleVisitor(databaseConnection,  from);
+		
+		reader = new StreamingVisitorReader(input, visitor );
 		
 	}
 
 	@Override
-	public void startup() {
-		super.startup();		
+	public void startup() {	
 		
 		try{
+		    reader.startup();
 			
-			from = RingBuffer.from(input);
-			visitor = new ExampleVisitor(databaseConnection,  from);
-						
-			reader = new StreamingVisitorReader(input, visitor );
 			
 		    ///////
 			//PUT YOUR LOGIC HERE FOR CONNTECTING TO THE DATABASE OR OTHER TARGET FOR INFORMATION
 			//////
 			
-			reader.startup();
 								
 		} catch (Throwable t) {
 			throw new RuntimeException(t);

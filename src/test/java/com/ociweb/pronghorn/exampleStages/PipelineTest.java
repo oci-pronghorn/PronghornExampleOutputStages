@@ -179,10 +179,10 @@ public class PipelineTest {
 		OutputStageStreamingVisitorExample out4 = new OutputStageStreamingVisitorExample(gm, checker4, ringBuffer4);
 
 		//Turn on monitoring
-		MonitorConsoleStage.attach(gm, monitorRate, ringBufferMonitorConfig);
+//		MonitorConsoleStage.attach(gm, monitorRate, ringBufferMonitorConfig);
 		
 		//Enable batching
-		GraphManager.enableBatching(gm);
+//		GraphManager.enableBatching(gm);
 
 		timeAndRunTest(ringBuffer, gm, " StreamingVisitor", checker1, checker2, checker3, checker4);   
 		
@@ -200,7 +200,7 @@ public class PipelineTest {
 				
 		GenerateTestDataStage generator = new GenerateTestDataStage(gm, pipe(ringBufferConfig));
 				
-		RoundRobinRouteStage router = new RoundRobinRouteStage(gm, getOutputPipe(gm, generator,1), 
+		RoundRobinRouteStage router = new RoundRobinRouteStage(gm, getOutputPipe(gm, generator), 
 		                                                        pipe(ringBufferConfig),
 		                                                        pipe(ringBufferConfig),
 		                                                        pipe(ringBufferConfig),
@@ -217,7 +217,7 @@ public class PipelineTest {
 		//Enable batching
 		GraphManager.enableBatching(gm); //TODO: NOTE this is batching our monitors and we dont want that!!
 
-		timeAndRunTest(getOutputPipe(gm, generator,1), gm, " EventProducer", checker1, checker2, checker3, checker4);   
+		timeAndRunTest(getOutputPipe(gm, generator), gm, " EventProducer", checker1, checker2, checker3, checker4);   
 		
 	}
 	
