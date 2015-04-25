@@ -124,7 +124,7 @@ public class OutputStageLowLevelExample extends PronghornStage {
 						
 			databaseConnection.writeQOS(qos);
 			
-			RingBuffer.releaseReadLock(input);
+			RingBuffer.readBytesAndreleaseReadLock(input);
 			
 			//low level API can write multiple message and messages with multiple fragments but it 
 			//becomes more difficult. (That is what the high level API is more commonly used for)
