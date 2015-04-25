@@ -19,7 +19,7 @@
 		
 		<dependency>
 	  		<groupId>com.ociweb</groupId>
-	  		<artifactId>jFASTStages</artifactId>
+	  		<artifactId>Pronghorn</artifactId>
 	  		<version>0.0.1-SNAPSHOT</version>
     	</dependency>
     	
