@@ -90,9 +90,19 @@
 	      <configuration>
 				<source>1.6</source>  <!-- Java6 for default android compatibility, feel free to change --> 
 		 		<target>1.6</target>
- 		         <argLine>-Xmx1024m</argLine>
 	      </configuration>
 	    </plugin>
+	    
+	    <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>2.18.1</version>
+            <configuration>
+                <argLine>-Xmx2048m</argLine>
+                <!--  parallel>methods</parallel -->
+                <!--  threadCount>3</threadCount -->
+            </configuration>
+        </plugin>
 	   
 	  </plugins>
 	</build>	  
