@@ -88,8 +88,9 @@
               <artifactId>maven-compiler-plugin</artifactId>
               <version>3.0</version>
 	      <configuration>
-		<source>1.6</source>  <!-- Java6 for default android compatibility, feel free to change --> 
- 		<target>1.6</target>
+				<source>1.6</source>  <!-- Java6 for default android compatibility, feel free to change --> 
+		 		<target>1.6</target>
+ 		         <argLine>-Xmx1024m</argLine>
 	      </configuration>
 	    </plugin>
 	   
