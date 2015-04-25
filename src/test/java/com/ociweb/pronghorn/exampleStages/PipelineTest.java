@@ -9,7 +9,9 @@ import static com.ociweb.pronghorn.ring.RingBuffer.confirmLowLevelWrite;
 import static com.ociweb.pronghorn.ring.RingBuffer.initLowLevelWriter;
 import static com.ociweb.pronghorn.ring.RingBuffer.publishWrites;
 import static com.ociweb.pronghorn.ring.RingBuffer.roomToLowLevelWrite;
-import static org.junit.Assert.*;
+import static com.ociweb.pronghorn.stage.scheduling.GraphManager.getOutputPipe;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
@@ -20,14 +22,12 @@ import org.junit.Test;
 import com.ociweb.pronghorn.ring.FieldReferenceOffsetManager;
 import com.ociweb.pronghorn.ring.RingBuffer;
 import com.ociweb.pronghorn.ring.RingBufferConfig;
-import static com.ociweb.pronghorn.ring.RingBufferConfig.*;
 import com.ociweb.pronghorn.ring.loader.TemplateHandler;
 import com.ociweb.pronghorn.stage.PronghornStage;
 import com.ociweb.pronghorn.stage.monitor.MonitorConsoleStage;
 import com.ociweb.pronghorn.stage.monitor.MonitorFROM;
 import com.ociweb.pronghorn.stage.route.RoundRobinRouteStage;
 import com.ociweb.pronghorn.stage.scheduling.GraphManager;
-import static com.ociweb.pronghorn.stage.scheduling.GraphManager.*;
 import com.ociweb.pronghorn.stage.scheduling.StageScheduler;
 import com.ociweb.pronghorn.stage.scheduling.ThreadPerStageScheduler;
 
@@ -82,70 +82,56 @@ public class PipelineTest {
 	@Test
 	public void lowLevelOutputStageTest() {
 				
-		RingBuffer ringBuffer = new RingBuffer(ringBufferConfig);
-		RingBuffer ringBuffer1 = new RingBuffer(ringBufferConfig);
-		RingBuffer ringBuffer2 = new RingBuffer(ringBufferConfig);
-		RingBuffer ringBuffer3 = new RingBuffer(ringBufferConfig);
-		RingBuffer ringBuffer4 = new RingBuffer(ringBufferConfig);
-						
-   	    GraphManager gm = new GraphManager();
-							
-		FauxDatabase checker1 = new FauxDatabaseChecker();
-		FauxDatabase checker2 = new FauxDatabaseChecker();
-		FauxDatabase checker3 = new FauxDatabaseChecker();
-		FauxDatabase checker4 = new FauxDatabaseChecker();
-				
-		GenerateTestDataStage generator = new GenerateTestDataStage(gm, ringBuffer);
-		
-		RoundRobinRouteStage router = new RoundRobinRouteStage(gm, ringBuffer, ringBuffer1, ringBuffer2, ringBuffer3, ringBuffer4);
-		
-		OutputStageLowLevelExample out1 = new OutputStageLowLevelExample(gm, checker1, ringBuffer1);
-		OutputStageLowLevelExample out2 = new OutputStageLowLevelExample(gm, checker2, ringBuffer2);
-		OutputStageLowLevelExample out3 = new OutputStageLowLevelExample(gm, checker3, ringBuffer3);
-		OutputStageLowLevelExample out4 = new OutputStageLowLevelExample(gm, checker4, ringBuffer4);
+        GraphManager gm = new GraphManager();
+        
+        PronghornStage router = buildPipeline(gm);
+        
+        FauxDatabase checker1 = new FauxDatabaseChecker();
+        FauxDatabase checker2 = new FauxDatabaseChecker();
+        FauxDatabase checker3 = new FauxDatabaseChecker();
+        FauxDatabase checker4 = new FauxDatabaseChecker();
+                
+        PronghornStage out1 = new OutputStageLowLevelExample(gm, checker1, GraphManager.getOutputPipe(gm, router, 1));
+        PronghornStage out2 = new OutputStageLowLevelExample(gm, checker2, GraphManager.getOutputPipe(gm, router, 2));
+        PronghornStage out3 = new OutputStageLowLevelExample(gm, checker3, GraphManager.getOutputPipe(gm, router, 3));
+        PronghornStage out4 = new OutputStageLowLevelExample(gm, checker4, GraphManager.getOutputPipe(gm, router, 4));
+
 
 		//Turn on monitoring
 		MonitorConsoleStage.attach(gm, monitorRate, ringBufferMonitorConfig);	
 		
 		//Enable batching
-		GraphManager.enableBatching(gm);
+	//	GraphManager.enableBatching(gm);
 
-		timeAndRunTest(ringBuffer, gm, " LowLevel", checker1, checker2, checker3, checker4);   
+		timeAndRunTest(getOutputPipe(gm, GraphManager.findStageByPath(gm, 1)), gm, " LowLevel", checker1, checker2, checker3, checker4);   
 		
 	}
 	
 	@Test
 	public void highLevelOutputStageTest() {
 				
-		RingBuffer ringBuffer = new RingBuffer(ringBufferConfig);
-		RingBuffer ringBuffer1 = new RingBuffer(ringBufferConfig);
-		RingBuffer ringBuffer2 = new RingBuffer(ringBufferConfig);
-		RingBuffer ringBuffer3 = new RingBuffer(ringBufferConfig);
-		RingBuffer ringBuffer4 = new RingBuffer(ringBufferConfig);
-						
-   	    GraphManager gm = new GraphManager();
-							
-		FauxDatabase checker1 = new FauxDatabaseChecker();
-		FauxDatabase checker2 = new FauxDatabaseChecker();
-		FauxDatabase checker3 = new FauxDatabaseChecker();
-		FauxDatabase checker4 = new FauxDatabaseChecker();
-				
-		GenerateTestDataStage generator = new GenerateTestDataStage(gm, ringBuffer);
-		
-		RoundRobinRouteStage router = new RoundRobinRouteStage(gm, ringBuffer, ringBuffer1, ringBuffer2, ringBuffer3, ringBuffer4);
-		
-		OutputStageHighLevelExample out1 = new OutputStageHighLevelExample(gm, checker1, ringBuffer1);
-		OutputStageHighLevelExample out2 = new OutputStageHighLevelExample(gm, checker2, ringBuffer2);
-		OutputStageHighLevelExample out3 = new OutputStageHighLevelExample(gm, checker3, ringBuffer3);
-		OutputStageHighLevelExample out4 = new OutputStageHighLevelExample(gm, checker4, ringBuffer4);
-
+	        GraphManager gm = new GraphManager();
+	        
+	        PronghornStage router = buildPipeline(gm);
+	        
+	        FauxDatabase checker1 = new FauxDatabaseChecker();
+	        FauxDatabase checker2 = new FauxDatabaseChecker();
+	        FauxDatabase checker3 = new FauxDatabaseChecker();
+	        FauxDatabase checker4 = new FauxDatabaseChecker();
+	                
+	        PronghornStage out1 = new OutputStageHighLevelExample(gm, checker1, GraphManager.getOutputPipe(gm, router, 1));
+	        PronghornStage out2 = new OutputStageHighLevelExample(gm, checker2, GraphManager.getOutputPipe(gm, router, 2));
+	        PronghornStage out3 = new OutputStageHighLevelExample(gm, checker3, GraphManager.getOutputPipe(gm, router, 3));
+	        PronghornStage out4 = new OutputStageHighLevelExample(gm, checker4, GraphManager.getOutputPipe(gm, router, 4));
+	        
+	
 		//Turn on monitoring
 		MonitorConsoleStage.attach(gm, monitorRate, ringBufferMonitorConfig);
 		
 		//Enable batching
 		GraphManager.enableBatching(gm);
 
-		timeAndRunTest(ringBuffer, gm, " HighLevel", checker1, checker2, checker3, checker4);   
+		timeAndRunTest(getOutputPipe(gm, GraphManager.findStageByPath(gm, 1)), gm, " HighLevel", checker1, checker2, checker3, checker4);   
 		
 	}
 	
@@ -153,30 +139,19 @@ public class PipelineTest {
 	
 	@Test
 	public void streamingVisitorOutputStageTest() {
-				
-		RingBuffer ringBuffer = new RingBuffer(ringBufferConfig);
-		RingBuffer ringBuffer1 = new RingBuffer(ringBufferConfig);
-		RingBuffer ringBuffer2 = new RingBuffer(ringBufferConfig);
-		RingBuffer ringBuffer3 = new RingBuffer(ringBufferConfig);
-		RingBuffer ringBuffer4 = new RingBuffer(ringBufferConfig);
-						
-   	    GraphManager gm = new GraphManager();
-							
+	    GraphManager gm = new GraphManager();
+		
+	    PronghornStage router = buildPipeline(gm);
+		
 		FauxDatabase checker1 = new FauxDatabaseChecker();
 		FauxDatabase checker2 = new FauxDatabaseChecker();
 		FauxDatabase checker3 = new FauxDatabaseChecker();
 		FauxDatabase checker4 = new FauxDatabaseChecker();
 				
-		GenerateTestDataStage generator = new GenerateTestDataStage(gm, ringBuffer);
-		
-		//OutputStageStreamingConsumerExample out1 = new OutputStageStreamingConsumerExample(gm, checker1, ringBuffer);
-		
-		RoundRobinRouteStage router = new RoundRobinRouteStage(gm, ringBuffer, ringBuffer1, ringBuffer2, ringBuffer3, ringBuffer4);
-				
-		OutputStageStreamingVisitorExample out1 = new OutputStageStreamingVisitorExample(gm, checker1, ringBuffer1);
-		OutputStageStreamingVisitorExample out2 = new OutputStageStreamingVisitorExample(gm, checker2, ringBuffer2);
-		OutputStageStreamingVisitorExample out3 = new OutputStageStreamingVisitorExample(gm, checker3, ringBuffer3);
-		OutputStageStreamingVisitorExample out4 = new OutputStageStreamingVisitorExample(gm, checker4, ringBuffer4);
+		PronghornStage out1 = new OutputStageStreamingVisitorExample(gm, checker1, GraphManager.getOutputPipe(gm, router, 1));
+		PronghornStage out2 = new OutputStageStreamingVisitorExample(gm, checker2, GraphManager.getOutputPipe(gm, router, 2));
+		PronghornStage out3 = new OutputStageStreamingVisitorExample(gm, checker3, GraphManager.getOutputPipe(gm, router, 3));
+		PronghornStage out4 = new OutputStageStreamingVisitorExample(gm, checker4, GraphManager.getOutputPipe(gm, router, 4));
 
 		//Turn on monitoring
 //		MonitorConsoleStage.attach(gm, monitorRate, ringBufferMonitorConfig);
@@ -184,32 +159,39 @@ public class PipelineTest {
 		//Enable batching
 //		GraphManager.enableBatching(gm);
 
-		timeAndRunTest(ringBuffer, gm, " StreamingVisitor", checker1, checker2, checker3, checker4);   
+		timeAndRunTest(getOutputPipe(gm, GraphManager.findStageByPath(gm, 1)), gm, " StreamingVisitor", checker1, checker2, checker3, checker4);   
 		
 	}
+
+
+    private PronghornStage buildPipeline(GraphManager gm) {
+        PronghornStage router;
+	    {
+    		GenerateTestDataStage generator = new GenerateTestDataStage(gm, new RingBuffer(ringBufferConfig));		
+    		router = new RoundRobinRouteStage(gm, GraphManager.getOutputPipe(gm, generator, 1), new RingBuffer(ringBufferConfig), new RingBuffer(ringBufferConfig), new RingBuffer(ringBufferConfig), new RingBuffer(ringBufferConfig));
+	    }
+        return router;
+    }
 	
 	@Test
 	public void eventProducerOutputStageTest() {
-										
-   	    GraphManager gm = new GraphManager();
-							
-		FauxDatabase checker1 = new FauxDatabaseChecker();
-		FauxDatabase checker2 = new FauxDatabaseChecker();
-		FauxDatabase checker3 = new FauxDatabaseChecker();
-		FauxDatabase checker4 = new FauxDatabaseChecker();
-				
-		GenerateTestDataStage generator = new GenerateTestDataStage(gm, pipe(ringBufferConfig));
-				
-		RoundRobinRouteStage router = new RoundRobinRouteStage(gm, getOutputPipe(gm, generator), 
-		                                                        pipe(ringBufferConfig),
-		                                                        pipe(ringBufferConfig),
-		                                                        pipe(ringBufferConfig),
-		                                                        pipe(ringBufferConfig));
-				
-		OutputStageEventProducerExample out1 = new OutputStageEventProducerExample(gm, checker1, getOutputPipe(gm, router, 1));
-		OutputStageEventProducerExample out2 = new OutputStageEventProducerExample(gm, checker2, getOutputPipe(gm, router, 2));
-		OutputStageEventProducerExample out3 = new OutputStageEventProducerExample(gm, checker3, getOutputPipe(gm, router, 3));
-		OutputStageEventProducerExample out4 = new OutputStageEventProducerExample(gm, checker4, getOutputPipe(gm, router, 4));
+									
+	    
+	       GraphManager gm = new GraphManager();
+	        
+	        PronghornStage router = buildPipeline(gm);
+	        
+	        FauxDatabase checker1 = new FauxDatabaseChecker();
+	        FauxDatabase checker2 = new FauxDatabaseChecker();
+	        FauxDatabase checker3 = new FauxDatabaseChecker();
+	        FauxDatabase checker4 = new FauxDatabaseChecker();
+	                
+	        PronghornStage out1 = new OutputStageEventProducerExample(gm, checker1, GraphManager.getOutputPipe(gm, router, 1));
+	        PronghornStage out2 = new OutputStageEventProducerExample(gm, checker2, GraphManager.getOutputPipe(gm, router, 2));
+	        PronghornStage out3 = new OutputStageEventProducerExample(gm, checker3, GraphManager.getOutputPipe(gm, router, 3));
+	        PronghornStage out4 = new OutputStageEventProducerExample(gm, checker4, GraphManager.getOutputPipe(gm, router, 4));
+	    
+	    
 
 		//Turn on monitoring
 		MonitorConsoleStage.attach(gm, monitorRate, ringBufferMonitorConfig);
@@ -217,7 +199,7 @@ public class PipelineTest {
 		//Enable batching
 		GraphManager.enableBatching(gm); //TODO: NOTE this is batching our monitors and we dont want that!!
 
-		timeAndRunTest(getOutputPipe(gm, generator), gm, " EventProducer", checker1, checker2, checker3, checker4);   
+		timeAndRunTest(getOutputPipe(gm, GraphManager.findStageByPath(gm, 1)), gm, " EventProducer", checker1, checker2, checker3, checker4);   
 		
 	}
 	
@@ -379,7 +361,7 @@ public class PipelineTest {
 			while (--j>=0) {
 				if (topic.charAt(j)!=value.charAt(j)) {
 					assertEquals(topic, value.toString());
-				};
+				}
 			}
 		}
 
@@ -391,7 +373,7 @@ public class PipelineTest {
 			while (--j>=0) {
 				if (clientId.charAt(j)!=value.charAt(j)) {
 					assertEquals(clientId, value.toString());
-				};
+				}
 			}
 		}
 
@@ -403,7 +385,7 @@ public class PipelineTest {
 			while (--j>=0) {
 				if (serverURI.charAt(j)!=value.charAt(j)) {
 					assertEquals(serverURI, value.toString());
-				};
+				}
 			}
 		}
 
@@ -453,15 +435,17 @@ public class PipelineTest {
 		@Override
 		public void run() {
 			int requiredSize = FROM.fragDataSize[fragToWrite]; //this can be set to the largest of the union of possible messages.
-						
-			if (roomToLowLevelWrite(output, requiredSize) ) {
+				
+			int count = 100;
+			while (--count>=0 && roomToLowLevelWrite(output, requiredSize) ) {
+			    
 				int consumedSize = 0;
 											
 				//when starting a new message this method must be used to record the message template id, and do internal housekeeping
 				addMsgIdx(output, fragToWrite);					
 							
 				addASCII(serverURI, 0, serverURI.length(), output); //serverURI
-				addUTF8(clientId, 0, clientId.length(), output); //clientId			
+				addUTF8(clientId, clientId.length(), output); //clientId			
 				addIntValue(clientIdIndex, output);  //clientId index								
 				addASCII(topic, 0, topic.length(), output); //topic		
 				addByteArray(payload, 0, payload.length, output);// payload 

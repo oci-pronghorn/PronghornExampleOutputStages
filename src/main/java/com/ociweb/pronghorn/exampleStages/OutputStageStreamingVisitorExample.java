@@ -19,7 +19,7 @@ public class OutputStageStreamingVisitorExample extends PronghornStage {
 		private final StringBuilder clientIdBuilder = new StringBuilder();
 		private final StringBuilder topicIBuilder = new StringBuilder();
 				
-		public ExampleVisitor(FauxDatabase databaseConnection, FieldReferenceOffsetManager from ) {
+		public ExampleVisitor(FauxDatabase databaseConnection ) {
 			this.databaseConnection = databaseConnection;
 	
 		}
@@ -91,9 +91,9 @@ public class OutputStageStreamingVisitorExample extends PronghornStage {
 		super(graphManager, input, NONE);
 
 		from = RingBuffer.from(input);
-		visitor = new ExampleVisitor(databaseConnection,  from);
+		visitor = new ExampleVisitor(databaseConnection);
 		
-		reader = new StreamingVisitorReader(input, visitor );
+		reader = new StreamingVisitorReader(input, visitor);//new StreamingReadVisitorDebugDelegate(visitor) );
 		
 	}
 

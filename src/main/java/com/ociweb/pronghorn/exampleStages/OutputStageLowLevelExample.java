@@ -121,9 +121,7 @@ public class OutputStageLowLevelExample extends PronghornStage {
 				databaseConnection.writePayload(data,pos,len,mask);
 			}
 			int qos = RingBuffer.takeValue(input);
-			
-			int len = RingBuffer.takeValue(input); //total of all bytes read from length
-			
+						
 			databaseConnection.writeQOS(qos);
 			
 			RingBuffer.releaseReadLock(input);
