@@ -157,7 +157,7 @@ public class PipelineTest {
 //		MonitorConsoleStage.attach(gm, monitorRate, ringBufferMonitorConfig);
 		
 		//Enable batching
-//		GraphManager.enableBatching(gm);
+		GraphManager.enableBatching(gm);
 
 		timeAndRunTest(getOutputPipe(gm, GraphManager.findStageByPath(gm, 1)), gm, " StreamingVisitor", checker1, checker2, checker3, checker4);   
 		
