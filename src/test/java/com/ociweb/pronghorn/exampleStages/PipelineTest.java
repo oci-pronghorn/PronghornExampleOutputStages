@@ -6,7 +6,6 @@ import static com.ociweb.pronghorn.ring.RingBuffer.addIntValue;
 import static com.ociweb.pronghorn.ring.RingBuffer.addMsgIdx;
 import static com.ociweb.pronghorn.ring.RingBuffer.addUTF8;
 import static com.ociweb.pronghorn.ring.RingBuffer.confirmLowLevelWrite;
-import static com.ociweb.pronghorn.ring.RingBuffer.initLowLevelWriter;
 import static com.ociweb.pronghorn.ring.RingBuffer.publishWrites;
 import static com.ociweb.pronghorn.ring.RingBuffer.roomToLowLevelWrite;
 import static com.ociweb.pronghorn.stage.scheduling.GraphManager.getOutputPipe;
@@ -418,8 +417,6 @@ public class PipelineTest {
 		public void startup() {
 			super.startup();
 			try{
-				//setup the output ring for low level writing			
-				initLowLevelWriter(output); //TODO: AA, working to remove this.
 			
 			    ///////
 				//PUT YOUR LOGIC HERE FOR CONNTECTING TO THE DATABASE OR OTHER SOURCE OF INFORMATION
