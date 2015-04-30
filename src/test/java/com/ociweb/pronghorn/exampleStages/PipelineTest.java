@@ -97,7 +97,7 @@ public class PipelineTest {
 
 
 		//Turn on monitoring
-		MonitorConsoleStage.attach(gm, monitorRate, ringBufferMonitorConfig);	
+		MonitorConsoleStage.attach(gm);	
 		
 		//Enable batching
 	//	GraphManager.enableBatching(gm);
@@ -125,7 +125,7 @@ public class PipelineTest {
 	        
 	
 		//Turn on monitoring
-		MonitorConsoleStage.attach(gm, monitorRate, ringBufferMonitorConfig);
+		MonitorConsoleStage.attach(gm);
 		
 		//Enable batching
 		GraphManager.enableBatching(gm);
@@ -193,7 +193,7 @@ public class PipelineTest {
 	    
 
 		//Turn on monitoring
-		MonitorConsoleStage.attach(gm, monitorRate, ringBufferMonitorConfig);
+		MonitorConsoleStage.attach(gm);
 		
 		//Enable batching
 		GraphManager.enableBatching(gm); //TODO: NOTE this is batching our monitors and we dont want that!!
