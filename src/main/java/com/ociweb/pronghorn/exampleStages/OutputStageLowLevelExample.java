@@ -18,7 +18,6 @@ public class OutputStageLowLevelExample extends PronghornStage {
 	private final FieldReferenceOffsetManager FROM; //Acronym so this is in all caps (this holds the schema)
 	private final FauxDatabase databaseConnection;
 	
-	//TODO: pass in expected values?
 	
 	protected OutputStageLowLevelExample(GraphManager graphManager,	FauxDatabase databaseConnection, RingBuffer input) {
 		super(graphManager, input, NONE);
@@ -58,7 +57,6 @@ public class OutputStageLowLevelExample extends PronghornStage {
 	
 	@Override
 	public void startup() {
-		super.startup();
 		try{
 		
 		    ///////
