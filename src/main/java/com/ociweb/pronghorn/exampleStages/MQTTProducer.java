@@ -2,8 +2,8 @@ package com.ociweb.pronghorn.exampleStages;
 
 import java.nio.ByteBuffer;
 
-import com.ociweb.pronghorn.ring.proxy.ProngTemplateField;
-import com.ociweb.pronghorn.ring.proxy.ProngTemplateMessage;
+import com.ociweb.pronghorn.pipe.proxy.ProngTemplateField;
+import com.ociweb.pronghorn.pipe.proxy.ProngTemplateMessage;
 
 @ProngTemplateMessage(templateId=100)
 public interface MQTTProducer {

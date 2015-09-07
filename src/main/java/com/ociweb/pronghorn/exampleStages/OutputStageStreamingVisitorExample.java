@@ -2,11 +2,11 @@ package com.ociweb.pronghorn.exampleStages;
 
 import java.nio.ByteBuffer;
 
-import com.ociweb.pronghorn.ring.FieldReferenceOffsetManager;
-import com.ociweb.pronghorn.ring.RingBuffer;
-import com.ociweb.pronghorn.ring.stream.StreamingReadVisitor;
-import com.ociweb.pronghorn.ring.stream.StreamingReadVisitorAdapter;
-import com.ociweb.pronghorn.ring.stream.StreamingVisitorReader;
+import com.ociweb.pronghorn.pipe.FieldReferenceOffsetManager;
+import com.ociweb.pronghorn.pipe.Pipe;
+import com.ociweb.pronghorn.pipe.stream.StreamingReadVisitor;
+import com.ociweb.pronghorn.pipe.stream.StreamingReadVisitorAdapter;
+import com.ociweb.pronghorn.pipe.stream.StreamingVisitorReader;
 import com.ociweb.pronghorn.stage.PronghornStage;
 import com.ociweb.pronghorn.stage.scheduling.GraphManager;
 
@@ -87,10 +87,10 @@ public class OutputStageStreamingVisitorExample extends PronghornStage {
 	private FieldReferenceOffsetManager from;
 	
 	
-	protected OutputStageStreamingVisitorExample(GraphManager graphManager, FauxDatabase databaseConnection, RingBuffer input) {
+	protected OutputStageStreamingVisitorExample(GraphManager graphManager, FauxDatabase databaseConnection, Pipe input) {
 		super(graphManager, input, NONE);
 
-		from = RingBuffer.from(input);
+		from = Pipe.from(input);
 		visitor = new ExampleVisitor(databaseConnection);
 		
 		reader = new StreamingVisitorReader(input, visitor);//new StreamingReadVisitorDebugDelegate(visitor) );

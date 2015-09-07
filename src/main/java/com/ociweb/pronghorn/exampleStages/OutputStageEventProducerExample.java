@@ -2,9 +2,9 @@ package com.ociweb.pronghorn.exampleStages;
 
 import java.nio.ByteBuffer;
 
-import com.ociweb.pronghorn.ring.FieldReferenceOffsetManager;
-import com.ociweb.pronghorn.ring.RingBuffer;
-import com.ociweb.pronghorn.ring.proxy.EventProducer;
+import com.ociweb.pronghorn.pipe.FieldReferenceOffsetManager;
+import com.ociweb.pronghorn.pipe.Pipe;
+import com.ociweb.pronghorn.pipe.proxy.EventProducer;
 import com.ociweb.pronghorn.stage.PronghornStage;
 import com.ociweb.pronghorn.stage.scheduling.GraphManager;
 
@@ -19,7 +19,7 @@ public class OutputStageEventProducerExample extends PronghornStage {
 	private StringBuilder topicIBuilder;
 	private ByteBuffer tempByteBuffer;
 
-	protected OutputStageEventProducerExample(GraphManager graphManager, FauxDatabase databaseConnection, RingBuffer input) {
+	protected OutputStageEventProducerExample(GraphManager graphManager, FauxDatabase databaseConnection, Pipe input) {
 		super(graphManager, input, NONE);
 		////////
 		//STORE OTHER FIELDS THAT WILL BE REQUIRED IN STARTUP
@@ -27,7 +27,7 @@ public class OutputStageEventProducerExample extends PronghornStage {
 	
 		this.databaseConnection = databaseConnection;
 		this.producer = new EventProducer(input);
-		this.msgIdx = FieldReferenceOffsetManager.lookupTemplateLocator(100, RingBuffer.from(input));
+		this.msgIdx = FieldReferenceOffsetManager.lookupTemplateLocator(100, Pipe.from(input));
 	}
 
 	@Override

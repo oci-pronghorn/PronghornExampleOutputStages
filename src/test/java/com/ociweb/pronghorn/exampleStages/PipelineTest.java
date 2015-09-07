@@ -1,13 +1,13 @@
 package com.ociweb.pronghorn.exampleStages;
 
-import static com.ociweb.pronghorn.ring.RingBuffer.addASCII;
-import static com.ociweb.pronghorn.ring.RingBuffer.addByteArray;
-import static com.ociweb.pronghorn.ring.RingBuffer.addIntValue;
-import static com.ociweb.pronghorn.ring.RingBuffer.addMsgIdx;
-import static com.ociweb.pronghorn.ring.RingBuffer.addUTF8;
-import static com.ociweb.pronghorn.ring.RingBuffer.confirmLowLevelWrite;
-import static com.ociweb.pronghorn.ring.RingBuffer.publishWrites;
-import static com.ociweb.pronghorn.ring.RingBuffer.roomToLowLevelWrite;
+import static com.ociweb.pronghorn.pipe.Pipe.addASCII;
+import static com.ociweb.pronghorn.pipe.Pipe.addByteArray;
+import static com.ociweb.pronghorn.pipe.Pipe.addIntValue;
+import static com.ociweb.pronghorn.pipe.Pipe.addMsgIdx;
+import static com.ociweb.pronghorn.pipe.Pipe.addUTF8;
+import static com.ociweb.pronghorn.pipe.Pipe.confirmLowLevelWrite;
+import static com.ociweb.pronghorn.pipe.Pipe.publishWrites;
+import static com.ociweb.pronghorn.pipe.Pipe.roomToLowLevelWrite;
 import static com.ociweb.pronghorn.stage.scheduling.GraphManager.getOutputPipe;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -18,10 +18,10 @@ import java.util.concurrent.TimeUnit;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.ociweb.pronghorn.ring.FieldReferenceOffsetManager;
-import com.ociweb.pronghorn.ring.RingBuffer;
-import com.ociweb.pronghorn.ring.RingBufferConfig;
-import com.ociweb.pronghorn.ring.schema.loader.TemplateHandler;
+import com.ociweb.pronghorn.pipe.FieldReferenceOffsetManager;
+import com.ociweb.pronghorn.pipe.Pipe;
+import com.ociweb.pronghorn.pipe.PipeConfig;
+import com.ociweb.pronghorn.pipe.schema.loader.TemplateHandler;
 import com.ociweb.pronghorn.stage.PronghornStage;
 import com.ociweb.pronghorn.stage.monitor.MonitorConsoleStage;
 import com.ociweb.pronghorn.stage.monitor.MonitorFROM;
@@ -43,8 +43,8 @@ public class PipelineTest {
 	
 	private final Integer monitorRate = Integer.valueOf(50000000);
 	
-	private static RingBufferConfig ringBufferConfig;
-	private static RingBufferConfig ringBufferMonitorConfig;
+	private static PipeConfig ringBufferConfig;
+	private static PipeConfig ringBufferMonitorConfig;
 	
 	public static String serverURI = "tcp://localhost:1883";
 	public static String clientId = "thingFortytwo";
@@ -69,8 +69,8 @@ public class PipelineTest {
 		
 		try {
 			from = TemplateHandler.loadFrom("/exampleTemplate.xml");
-			ringBufferConfig = new RingBufferConfig(from, messagesOnRing, maxLengthVarField);
-			ringBufferMonitorConfig = new RingBufferConfig(MonitorFROM.buildFROM(), monitorMessagesOnRing, maxLengthVarField);
+			ringBufferConfig = new PipeConfig(from, messagesOnRing, maxLengthVarField);
+			ringBufferMonitorConfig = new PipeConfig(MonitorFROM.buildFROM(), monitorMessagesOnRing, maxLengthVarField);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
@@ -166,8 +166,8 @@ public class PipelineTest {
     private PronghornStage buildPipeline(GraphManager gm) {
         PronghornStage router;
 	    {
-    		GenerateTestDataStage generator = new GenerateTestDataStage(gm, new RingBuffer(ringBufferConfig));		
-    		router = new RoundRobinRouteStage(gm, GraphManager.getOutputPipe(gm, generator, 1), new RingBuffer(ringBufferConfig), new RingBuffer(ringBufferConfig), new RingBuffer(ringBufferConfig), new RingBuffer(ringBufferConfig));
+    		GenerateTestDataStage generator = new GenerateTestDataStage(gm, new Pipe(ringBufferConfig));		
+    		router = new RoundRobinRouteStage(gm, GraphManager.getOutputPipe(gm, generator, 1), new Pipe(ringBufferConfig), new Pipe(ringBufferConfig), new Pipe(ringBufferConfig), new Pipe(ringBufferConfig));
 	    }
         return router;
     }
@@ -202,7 +202,7 @@ public class PipelineTest {
 		
 	}
 	
-	private long timeAndRunTest(RingBuffer ringBuffer, GraphManager gm, String label, FauxDatabase  ... checker) {
+	private long timeAndRunTest(Pipe ringBuffer, GraphManager gm, String label, FauxDatabase  ... checker) {
 		StageScheduler scheduler = new ThreadPerStageScheduler(GraphManager.cloneAll(gm));
 		 
 	    long startTime = System.currentTimeMillis();
@@ -230,7 +230,7 @@ public class PipelineTest {
 	}
 
 
-	private long reportResults(RingBuffer ringBuffer, String label,
+	private long reportResults(Pipe ringBuffer, String label,
 			long duration, FauxDatabase... checker) {
 		long messages=0;
         long bytes=0;
@@ -242,7 +242,7 @@ public class PipelineTest {
 				
 		if (0!=duration) {
 			
-			long bytesMoved = (4*RingBuffer.headPosition(ringBuffer))+bytes;
+			long bytesMoved = (4*Pipe.headPosition(ringBuffer))+bytes;
 			float mbMoved = (8f*bytesMoved)/(float)(1<<20);
 			
 			System.out.println("TotalMessages:"+messages + 
@@ -398,12 +398,12 @@ public class PipelineTest {
 
 		private int    clientIdIndex = 42;	
 		private FieldReferenceOffsetManager FROM;		
-		private RingBuffer output;
+		private Pipe output;
 		
-		protected GenerateTestDataStage(GraphManager graphManager, RingBuffer output) {
+		protected GenerateTestDataStage(GraphManager graphManager, Pipe output) {
 			super(graphManager, NONE, output);
 			
-			FROM = RingBuffer.from(output);
+			FROM = Pipe.from(output);
 			
 			this.output = output;
 			//all the script positions for every message is found in this array

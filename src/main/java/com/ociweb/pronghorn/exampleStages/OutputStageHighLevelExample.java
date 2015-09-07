@@ -1,11 +1,11 @@
 package com.ociweb.pronghorn.exampleStages;
 
-import static com.ociweb.pronghorn.ring.FieldReferenceOffsetManager.lookupFieldLocator;
-import static com.ociweb.pronghorn.ring.FieldReferenceOffsetManager.lookupTemplateLocator;
+import static com.ociweb.pronghorn.pipe.FieldReferenceOffsetManager.lookupFieldLocator;
+import static com.ociweb.pronghorn.pipe.FieldReferenceOffsetManager.lookupTemplateLocator;
 
-import com.ociweb.pronghorn.ring.FieldReferenceOffsetManager;
-import com.ociweb.pronghorn.ring.RingBuffer;
-import com.ociweb.pronghorn.ring.RingReader;
+import com.ociweb.pronghorn.pipe.FieldReferenceOffsetManager;
+import com.ociweb.pronghorn.pipe.Pipe;
+import com.ociweb.pronghorn.pipe.PipeReader;
 import com.ociweb.pronghorn.stage.PronghornStage;
 import com.ociweb.pronghorn.stage.scheduling.GraphManager;
 
@@ -16,7 +16,7 @@ public class OutputStageHighLevelExample extends PronghornStage {
 	//TODO: AA, no startup /shutdown called in stage
 	//TODO: AA, shutdown is a signal not a concurrent method call.
 	
-	private final RingBuffer input;
+	private final Pipe input;
 	private final FieldReferenceOffsetManager FROM; //Acronym so this is in all caps (this holds the schema)
 	
 	private final int MSG_MQTT;
@@ -33,14 +33,14 @@ public class OutputStageHighLevelExample extends PronghornStage {
 	private StringBuilder clientIdBuilder;
 	private StringBuilder topicIBuilder;
 	
-	protected OutputStageHighLevelExample(GraphManager graphManager, FauxDatabase databaseConnection, RingBuffer input) {
+	protected OutputStageHighLevelExample(GraphManager graphManager, FauxDatabase databaseConnection, Pipe input) {
 		super(graphManager, input, NONE);
 		////////
 		//STORE OTHER FIELDS THAT WILL BE REQUIRED IN STARTUP
 		////////
 	
 		this.input = input;
-		FROM = RingBuffer.from(input);
+		FROM = Pipe.from(input);
 		
 		this.databaseConnection = databaseConnection;
 		
@@ -82,30 +82,30 @@ public class OutputStageHighLevelExample extends PronghornStage {
 	@Override
 	public void run() {
 				
-		while (RingReader.tryReadFragment(input)) {		
+		while (PipeReader.tryReadFragment(input)) {		
 			
 			
-			assert(RingReader.isNewMessage(input)) : "This test should only have one simple message made up of one fragment";
+			assert(PipeReader.isNewMessage(input)) : "This test should only have one simple message made up of one fragment";
 			
-			int msgIdx = RingReader.getMsgIdx(input);
+			int msgIdx = PipeReader.getMsgIdx(input);
 			
 			serverURIBuilder.setLength(0);
-			CharSequence serverURI = (CharSequence)RingReader.readASCII(input, FIELD_SERVER_URI, serverURIBuilder);
+			CharSequence serverURI = (CharSequence)PipeReader.readASCII(input, FIELD_SERVER_URI, serverURIBuilder);
 			
 			clientIdBuilder.setLength(0);
-			CharSequence clientId = (CharSequence)RingReader.readASCII(input, FIELD_CLIENT_ID, clientIdBuilder);
+			CharSequence clientId = (CharSequence)PipeReader.readASCII(input, FIELD_CLIENT_ID, clientIdBuilder);
 			
 			topicIBuilder.setLength(0);
-			CharSequence topic = (CharSequence)RingReader.readASCII(input, FIELD_TOPIC, topicIBuilder);
+			CharSequence topic = (CharSequence)PipeReader.readASCII(input, FIELD_TOPIC, topicIBuilder);
 			
 			//This is more verbose because we have raw bytes in this field.
-			byte[] backingArray = RingReader.readBytesBackingArray(input, FIELD_PAYLOAD);
-			int len = RingReader.readBytesLength(input,FIELD_PAYLOAD);
-			int pos = RingReader.readBytesPosition(input, FIELD_PAYLOAD);
-			int mask = RingReader.readBytesMask(input, FIELD_PAYLOAD);
+			byte[] backingArray = PipeReader.readBytesBackingArray(input, FIELD_PAYLOAD);
+			int len = PipeReader.readBytesLength(input,FIELD_PAYLOAD);
+			int pos = PipeReader.readBytesPosition(input, FIELD_PAYLOAD);
+			int mask = PipeReader.readBytesMask(input, FIELD_PAYLOAD);
 						
-			int clientIndex = RingReader.readInt(input, FIELD_CLIENT_INDEX);
-			int qos = RingReader.readInt(input, FIELD_QOS);
+			int clientIndex = PipeReader.readInt(input, FIELD_CLIENT_INDEX);
+			int qos = PipeReader.readInt(input, FIELD_QOS);
 			
 			databaseConnection.writeMessageId(msgIdx);
 			databaseConnection.writeServerURI(serverURI);
@@ -115,7 +115,7 @@ public class OutputStageHighLevelExample extends PronghornStage {
 			databaseConnection.writePayload(backingArray, pos, len, mask);
 			databaseConnection.writeQOS(qos);
 						
-			RingReader.releaseReadLock(input);
+			PipeReader.releaseReadLock(input);
 		} 
 		
 	}

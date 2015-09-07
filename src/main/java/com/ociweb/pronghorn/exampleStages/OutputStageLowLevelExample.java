@@ -1,25 +1,26 @@
 package com.ociweb.pronghorn.exampleStages;
 
-import static com.ociweb.pronghorn.ring.RingBuffer.byteBackingArray;
-import static com.ociweb.pronghorn.ring.RingBuffer.byteMask;
-import static com.ociweb.pronghorn.ring.RingBuffer.bytePosition;
-import static com.ociweb.pronghorn.ring.RingBuffer.takeRingByteLen;
-import static com.ociweb.pronghorn.ring.RingBuffer.takeRingByteMetaData;
-import com.ociweb.pronghorn.ring.FieldReferenceOffsetManager;
-import com.ociweb.pronghorn.ring.RingBuffer;
+import static com.ociweb.pronghorn.pipe.Pipe.byteBackingArray;
+import static com.ociweb.pronghorn.pipe.Pipe.byteMask;
+import static com.ociweb.pronghorn.pipe.Pipe.bytePosition;
+import static com.ociweb.pronghorn.pipe.Pipe.takeRingByteLen;
+import static com.ociweb.pronghorn.pipe.Pipe.takeRingByteMetaData;
+
+import com.ociweb.pronghorn.pipe.FieldReferenceOffsetManager;
+import com.ociweb.pronghorn.pipe.Pipe;
 import com.ociweb.pronghorn.stage.PronghornStage;
 import com.ociweb.pronghorn.stage.scheduling.GraphManager;
 
 public class OutputStageLowLevelExample extends PronghornStage {
 
-	private final RingBuffer input;
+	private final Pipe input;
 	
 	private final int msgIdx;
 	private final FieldReferenceOffsetManager FROM; //Acronym so this is in all caps (this holds the schema)
 	private final FauxDatabase databaseConnection;
 	
 	
-	protected OutputStageLowLevelExample(GraphManager graphManager,	FauxDatabase databaseConnection, RingBuffer input) {
+	protected OutputStageLowLevelExample(GraphManager graphManager,	FauxDatabase databaseConnection, Pipe input) {
 		super(graphManager, input, NONE);
 		
 		this.input = input;
@@ -30,7 +31,7 @@ public class OutputStageLowLevelExample extends PronghornStage {
 		//this makes an easy demo to understand and test.
 		///
 		this.databaseConnection = databaseConnection;
-		this.FROM = RingBuffer.from(input);
+		this.FROM = Pipe.from(input);
 		
 		//all the script positions for every message is found in this array
 		//the length of this array should match the count of templates
@@ -75,8 +76,8 @@ public class OutputStageLowLevelExample extends PronghornStage {
 		
 		
 		//must be at least 1, if so we have a fragment
-		if (RingBuffer.contentToLowLevelRead(input, 1)){
-			int msgIdx = RingBuffer.takeMsgIdx(input);
+		if (Pipe.contentToLowLevelRead(input, 1)){
+			int msgIdx = Pipe.takeMsgIdx(input);
 			
 			databaseConnection.writeMessageId(msgIdx);
 			
@@ -98,7 +99,7 @@ public class OutputStageLowLevelExample extends PronghornStage {
 				int mask = byteMask(input);//NOTE: the consumer must do their own UTF8 conversion
 				databaseConnection.writeClientId(data,pos,len,mask);
 			}
-			int clientIdIdx = RingBuffer.takeValue(input);
+			int clientIdIdx = Pipe.takeValue(input);
 			databaseConnection.writeClientIdIdx(clientIdIdx);
 			//read the ASCII topic
 			{
@@ -118,16 +119,16 @@ public class OutputStageLowLevelExample extends PronghornStage {
 				int mask = byteMask(input);	
 				databaseConnection.writePayload(data,pos,len,mask);
 			}
-			int qos = RingBuffer.takeValue(input);
+			int qos = Pipe.takeValue(input);
 						
 			databaseConnection.writeQOS(qos);
 			
-			RingBuffer.releaseReads(input);
+			Pipe.releaseReads(input);
 			
 			//low level API can write multiple message and messages with multiple fragments but it 
 			//becomes more difficult. (That is what the high level API is more commonly used for)
 			//In this example we are writing 1 message that is made up of 1 fragment
-			RingBuffer.confirmLowLevelRead(input, FROM.fragDataSize[msgIdx]);
+			Pipe.confirmLowLevelRead(input, FROM.fragDataSize[msgIdx]);
 			
 		}
 		
