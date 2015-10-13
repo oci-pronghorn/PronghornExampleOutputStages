@@ -76,7 +76,7 @@ public class OutputStageLowLevelExample extends PronghornStage {
 		
 		
 		//must be at least 1, if so we have a fragment
-		if (Pipe.hasContentToRead((Pipe<S>) input, 1)){
+		if (Pipe.hasContentToRead(input, 1)){
 			int msgIdx = Pipe.takeMsgIdx(input);
 			
 			databaseConnection.writeMessageId(msgIdx);
