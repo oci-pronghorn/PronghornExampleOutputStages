@@ -1,7 +1,7 @@
 package com.ociweb.pronghorn.exampleStages;
 
 import static com.ociweb.pronghorn.pipe.Pipe.byteBackingArray;
-import static com.ociweb.pronghorn.pipe.Pipe.byteMask;
+import static com.ociweb.pronghorn.pipe.Pipe.blobMask;
 import static com.ociweb.pronghorn.pipe.Pipe.bytePosition;
 import static com.ociweb.pronghorn.pipe.Pipe.takeRingByteLen;
 import static com.ociweb.pronghorn.pipe.Pipe.takeRingByteMetaData;
@@ -87,7 +87,7 @@ public class OutputStageLowLevelExample extends PronghornStage {
 	        	int len = takeRingByteLen(input);
 	        	int pos = bytePosition(meta, input, len);        		
 				byte[] data = byteBackingArray(meta, input);
-				int mask = byteMask(input);//NOTE: the consumer must do their own ASCII conversion
+				int mask = blobMask(input);//NOTE: the consumer must do their own ASCII conversion
 				databaseConnection.writeServerURI(data,pos,len,mask);
 			}
 			//Read the UTF8 client id
@@ -96,7 +96,7 @@ public class OutputStageLowLevelExample extends PronghornStage {
 	        	int len = takeRingByteLen(input);
 	        	int pos = bytePosition(meta, input, len);        		
 				byte[] data = byteBackingArray(meta, input);
-				int mask = byteMask(input);//NOTE: the consumer must do their own UTF8 conversion
+				int mask = blobMask(input);//NOTE: the consumer must do their own UTF8 conversion
 				databaseConnection.writeClientId(data,pos,len,mask);
 			}
 			int clientIdIdx = Pipe.takeValue(input);
@@ -107,7 +107,7 @@ public class OutputStageLowLevelExample extends PronghornStage {
 	        	int len = takeRingByteLen(input);
 	        	int pos = bytePosition(meta, input, len);        		
 				byte[] data = byteBackingArray(meta, input);
-				int mask = byteMask(input);	
+				int mask = blobMask(input);	
 				databaseConnection.writeTopic(data,pos,len,mask);
 			}
 			//read the binary payload
@@ -116,7 +116,7 @@ public class OutputStageLowLevelExample extends PronghornStage {
 	        	int len = takeRingByteLen(input);
 	        	int pos = bytePosition(meta, input, len);        		
 				byte[] data = byteBackingArray(meta, input);
-				int mask = byteMask(input);	
+				int mask = blobMask(input);	
 				databaseConnection.writePayload(data,pos,len,mask);
 			}
 			int qos = Pipe.takeValue(input);
