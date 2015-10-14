@@ -24,7 +24,7 @@ import com.ociweb.pronghorn.pipe.PipeConfig;
 import com.ociweb.pronghorn.pipe.schema.loader.TemplateHandler;
 import com.ociweb.pronghorn.stage.PronghornStage;
 import com.ociweb.pronghorn.stage.monitor.MonitorConsoleStage;
-import com.ociweb.pronghorn.stage.monitor.MonitorFROM;
+import com.ociweb.pronghorn.stage.monitor.PipeMonitorSchema;
 import com.ociweb.pronghorn.stage.route.RoundRobinRouteStage;
 import com.ociweb.pronghorn.stage.scheduling.GraphManager;
 import com.ociweb.pronghorn.stage.scheduling.StageScheduler;
@@ -70,7 +70,7 @@ public class PipelineTest {
 		try {
 			from = TemplateHandler.loadFrom("/exampleTemplate.xml");
 			ringBufferConfig = new PipeConfig(from, messagesOnRing, maxLengthVarField);
-			ringBufferMonitorConfig = new PipeConfig(MonitorFROM.buildFROM(), monitorMessagesOnRing, maxLengthVarField);
+			ringBufferMonitorConfig = new PipeConfig(PipeMonitorSchema.buildFROM(), monitorMessagesOnRing, maxLengthVarField);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
