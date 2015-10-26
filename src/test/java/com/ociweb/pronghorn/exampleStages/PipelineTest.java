@@ -70,7 +70,7 @@ public class PipelineTest {
 		try {
 			from = TemplateHandler.loadFrom("/exampleTemplate.xml");
 			ringBufferConfig = new PipeConfig(from, messagesOnRing, maxLengthVarField);
-			ringBufferMonitorConfig = new PipeConfig(PipeMonitorSchema.buildFROM(), monitorMessagesOnRing, maxLengthVarField);
+			ringBufferMonitorConfig = new PipeConfig(PipeMonitorSchema.FROM, monitorMessagesOnRing, maxLengthVarField);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
