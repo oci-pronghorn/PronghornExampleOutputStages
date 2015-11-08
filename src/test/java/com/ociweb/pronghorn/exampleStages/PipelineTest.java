@@ -19,6 +19,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.ociweb.pronghorn.pipe.FieldReferenceOffsetManager;
+import com.ociweb.pronghorn.pipe.MessageSchemaDynamic;
 import com.ociweb.pronghorn.pipe.Pipe;
 import com.ociweb.pronghorn.pipe.PipeConfig;
 import com.ociweb.pronghorn.pipe.schema.loader.TemplateHandler;
@@ -69,8 +70,8 @@ public class PipelineTest {
 		
 		try {
 			from = TemplateHandler.loadFrom("/exampleTemplate.xml");
-			ringBufferConfig = new PipeConfig(from, messagesOnRing, maxLengthVarField);
-			ringBufferMonitorConfig = new PipeConfig(PipeMonitorSchema.FROM, monitorMessagesOnRing, maxLengthVarField);
+			ringBufferConfig = new PipeConfig(new MessageSchemaDynamic(from), messagesOnRing, maxLengthVarField);
+			ringBufferMonitorConfig = new PipeConfig(PipeMonitorSchema.instance, monitorMessagesOnRing, maxLengthVarField);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
