@@ -6,6 +6,7 @@ import static com.ociweb.pronghorn.pipe.Pipe.bytePosition;
 import static com.ociweb.pronghorn.pipe.Pipe.takeRingByteLen;
 import static com.ociweb.pronghorn.pipe.Pipe.takeRingByteMetaData;
 
+import com.ociweb.pronghorn.pipe.DataInputBlobReader;
 import com.ociweb.pronghorn.pipe.FieldReferenceOffsetManager;
 import com.ociweb.pronghorn.pipe.Pipe;
 import com.ociweb.pronghorn.stage.PronghornStage;
@@ -19,11 +20,13 @@ public class OutputStageLowLevelExample extends PronghornStage {
 	private final FieldReferenceOffsetManager FROM; //Acronym so this is in all caps (this holds the schema)
 	private final FauxDatabase databaseConnection;
 	
+	private final DataInputBlobReader reader;
 	
 	protected OutputStageLowLevelExample(GraphManager graphManager,	FauxDatabase databaseConnection, Pipe input) {
 		super(graphManager, input, NONE);
 		
 		this.input = input;
+		this.reader = new DataInputBlobReader(input);
 		
 		////
 		//should pass in connection details and do the connect in the startup method
@@ -112,12 +115,19 @@ public class OutputStageLowLevelExample extends PronghornStage {
 			}
 			//read the binary payload
 			{
-	        	int meta = takeRingByteMetaData(input);
-	        	int len = takeRingByteLen(input);
-	        	int pos = bytePosition(meta, input, len);        		
-				byte[] data = byteBackingArray(meta, input);
-				int mask = blobMask(input);	
-				databaseConnection.writePayload(data,pos,len,mask);
+			    int length = reader.openLowLevelAPIField();
+			   
+			    //old untra low level design
+//	        	int meta = takeRingByteMetaData(input);
+//	        	int len = takeRingByteLen(input);
+//	        	int pos = bytePosition(meta, input, len);        		
+//				byte[] data = byteBackingArray(meta, input);
+//				int mask = blobMask(input);	
+//				databaseConnection.writePayload(data,pos,len,mask);
+				
+			    //new InputStream DataInput design
+				databaseConnection.writePayload(reader);
+				
 			}
 			int qos = Pipe.takeValue(input);
 						

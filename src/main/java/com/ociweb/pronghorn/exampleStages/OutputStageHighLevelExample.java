@@ -3,6 +3,7 @@ package com.ociweb.pronghorn.exampleStages;
 import static com.ociweb.pronghorn.pipe.FieldReferenceOffsetManager.lookupFieldLocator;
 import static com.ociweb.pronghorn.pipe.FieldReferenceOffsetManager.lookupTemplateLocator;
 
+import com.ociweb.pronghorn.pipe.DataInputBlobReader;
 import com.ociweb.pronghorn.pipe.FieldReferenceOffsetManager;
 import com.ociweb.pronghorn.pipe.Pipe;
 import com.ociweb.pronghorn.pipe.PipeReader;
@@ -33,6 +34,8 @@ public class OutputStageHighLevelExample extends PronghornStage {
 	private StringBuilder clientIdBuilder;
 	private StringBuilder topicIBuilder;
 	
+	private final DataInputBlobReader reader;
+	
 	protected OutputStageHighLevelExample(GraphManager graphManager, FauxDatabase databaseConnection, Pipe input) {
 		super(graphManager, input, NONE);
 		////////
@@ -40,6 +43,7 @@ public class OutputStageHighLevelExample extends PronghornStage {
 		////////
 	
 		this.input = input;
+		this.reader = new DataInputBlobReader(input);
 		FROM = Pipe.from(input);
 		
 		this.databaseConnection = databaseConnection;
@@ -99,11 +103,14 @@ public class OutputStageHighLevelExample extends PronghornStage {
 			CharSequence topic = (CharSequence)PipeReader.readASCII(input, FIELD_TOPIC, topicIBuilder);
 			
 			//This is more verbose because we have raw bytes in this field.
-			byte[] backingArray = PipeReader.readBytesBackingArray(input, FIELD_PAYLOAD);
-			int len = PipeReader.readBytesLength(input,FIELD_PAYLOAD);
-			int pos = PipeReader.readBytesPosition(input, FIELD_PAYLOAD);
-			int mask = PipeReader.readBytesMask(input, FIELD_PAYLOAD);
+//			byte[] backingArray = PipeReader.readBytesBackingArray(input, FIELD_PAYLOAD);
+//			int len = PipeReader.readBytesLength(input,FIELD_PAYLOAD);
+//			int pos = PipeReader.readBytesPosition(input, FIELD_PAYLOAD);
+//			int mask = PipeReader.readBytesMask(input, FIELD_PAYLOAD);
 						
+			reader.openHighLevelAPIField(FIELD_PAYLOAD);
+			
+			
 			int clientIndex = PipeReader.readInt(input, FIELD_CLIENT_INDEX);
 			int qos = PipeReader.readInt(input, FIELD_QOS);
 			
@@ -112,7 +119,12 @@ public class OutputStageHighLevelExample extends PronghornStage {
 			databaseConnection.writeClientId(clientId);
 			databaseConnection.writeClientIdIdx(clientIndex);
 			databaseConnection.writeTopic(topic);
-			databaseConnection.writePayload(backingArray, pos, len, mask);
+			
+			
+		//	databaseConnection.writePayload(backingArray, pos, len, mask);
+			databaseConnection.writePayload(reader);
+			
+			
 			databaseConnection.writeQOS(qos);
 						
 			PipeReader.releaseReadLock(input);

@@ -12,12 +12,15 @@ import static com.ociweb.pronghorn.stage.scheduling.GraphManager.getOutputPipe;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.ociweb.pronghorn.pipe.DataInputBlobReader;
+import com.ociweb.pronghorn.pipe.DataOutputBlobWriter;
 import com.ociweb.pronghorn.pipe.FieldReferenceOffsetManager;
 import com.ociweb.pronghorn.pipe.MessageSchemaDynamic;
 import com.ociweb.pronghorn.pipe.Pipe;
@@ -333,6 +336,24 @@ public class PipelineTest {
 			totalBytes+=len;
 		}
 
+
+        @Override
+        public void writePayload(DataInputBlobReader reader) {
+            try {
+                int len = reader.available();
+                assertEquals(payloadBytes.length,len);
+                int j = len;
+                int c = 0;
+                while (--j>=0) {
+                    assertEquals(reader.readByte(), payloadBytes[c++]);
+                }
+                
+                totalBytes+=len;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        
 		@Override
 		public void writeQOS(int qos) {
 			assertEquals(0, qos);
@@ -388,6 +409,7 @@ public class PipelineTest {
 				}
 			}
 		}
+
 
 
 	}
