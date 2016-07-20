@@ -339,7 +339,7 @@ public class PipelineTest {
 
         @Override
         public void writePayload(DataInputBlobReader reader) {
-            try {
+
                 int len = reader.available();
                 assertEquals(payloadBytes.length,len);
                 int j = len;
@@ -349,9 +349,7 @@ public class PipelineTest {
                 }
                 
                 totalBytes+=len;
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+
         }
         
 		@Override
