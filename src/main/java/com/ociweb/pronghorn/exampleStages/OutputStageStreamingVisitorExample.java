@@ -63,22 +63,7 @@ public class OutputStageStreamingVisitorExample extends PronghornStage {
 			}
 		}
 
-		
-		@Override
-		public void visitASCII(String name, long id, Appendable value) {
-		   
-			switch((int)id) {
-				case 110:
-					databaseConnection.writeServerURI((CharSequence)value);
-					break;
-				case 111:
-					databaseConnection.writeClientId((CharSequence)value);
-					break;					
-				case 120:
-					databaseConnection.writeTopic((CharSequence)value);
-					break;
-			}
-		}
+
 	}
 
 	

@@ -43,6 +43,9 @@ public class OutputStageHighLevelExample extends PronghornStage {
 		////////
 	
 		this.input = input;
+		if (!Pipe.isInit(input)) {
+			input.initBuffers();
+		}
 		this.reader = new DataInputBlobReader(input);
 		FROM = Pipe.from(input);
 		
