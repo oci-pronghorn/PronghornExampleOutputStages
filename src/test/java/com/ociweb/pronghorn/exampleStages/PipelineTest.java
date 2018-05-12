@@ -12,7 +12,6 @@ import static com.ociweb.pronghorn.stage.scheduling.GraphManager.getOutputPipe;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.TimeUnit;
 
@@ -20,14 +19,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.ociweb.pronghorn.pipe.DataInputBlobReader;
-import com.ociweb.pronghorn.pipe.DataOutputBlobWriter;
 import com.ociweb.pronghorn.pipe.FieldReferenceOffsetManager;
 import com.ociweb.pronghorn.pipe.MessageSchemaDynamic;
 import com.ociweb.pronghorn.pipe.Pipe;
 import com.ociweb.pronghorn.pipe.PipeConfig;
 import com.ociweb.pronghorn.pipe.schema.loader.TemplateHandler;
 import com.ociweb.pronghorn.stage.PronghornStage;
-import com.ociweb.pronghorn.stage.monitor.MonitorConsoleStage;
+import com.ociweb.pronghorn.stage.monitor.PipeMonitorCollectorStage;
 import com.ociweb.pronghorn.stage.monitor.PipeMonitorSchema;
 import com.ociweb.pronghorn.stage.route.RoundRobinRouteStage;
 import com.ociweb.pronghorn.stage.scheduling.GraphManager;
@@ -101,7 +99,7 @@ public class PipelineTest {
 
 
 		//Turn on monitoring
-		MonitorConsoleStage.attach(gm);	
+        PipeMonitorCollectorStage.attach(gm);	
 		
 		//Enable batching
 	//	GraphManager.enableBatching(gm);
@@ -129,7 +127,7 @@ public class PipelineTest {
 	        
 	
 		//Turn on monitoring
-		MonitorConsoleStage.attach(gm);
+	        PipeMonitorCollectorStage.attach(gm);
 		
 		//Enable batching
 		GraphManager.enableBatching(gm);
@@ -197,7 +195,7 @@ public class PipelineTest {
 	    
 
 		//Turn on monitoring
-		MonitorConsoleStage.attach(gm);
+	        PipeMonitorCollectorStage.attach(gm);
 		
 		//Enable batching
 		GraphManager.enableBatching(gm); //TODO: NOTE this is batching our monitors and we dont want that!!
