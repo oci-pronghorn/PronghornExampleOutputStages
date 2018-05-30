@@ -453,7 +453,7 @@ public class PipelineTest {
 			int requiredSize = FROM.fragDataSize[fragToWrite]; //this can be set to the largest of the union of possible messages.
 				
 			int count = 100;
-			while (--count>=0 && roomToLowLevelWrite(output, requiredSize) ) {
+			while (--count>=0 && Pipe.hasRoomForWrite((Pipe<?>) output, requiredSize) ) {
 			    
 				int consumedSize = 0;
 											

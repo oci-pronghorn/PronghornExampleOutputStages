@@ -81,8 +81,8 @@ public class OutputStageLowLevelExample extends PronghornStage {
 			
 			//Read the ASCII server URI
 			{
-	        	int meta = takeRingByteMetaData(input);
-	        	int len = takeRingByteLen(input);
+	        	int meta = Pipe.takeByteArrayMetaData((Pipe<?>) input);
+	        	int len = Pipe.takeByteArrayLength((Pipe<?>) input);
 	        	int pos = bytePosition(meta, input, len);        		
 				byte[] data = byteBackingArray(meta, input);
 				int mask = blobMask(input);//NOTE: the consumer must do their own ASCII conversion
@@ -90,19 +90,19 @@ public class OutputStageLowLevelExample extends PronghornStage {
 			}
 			//Read the UTF8 client id
 			{
-	        	int meta = takeRingByteMetaData(input);
-	        	int len = takeRingByteLen(input);
+	        	int meta = Pipe.takeByteArrayMetaData((Pipe<?>) input);
+	        	int len = Pipe.takeByteArrayLength((Pipe<?>) input);
 	        	int pos = bytePosition(meta, input, len);        		
 				byte[] data = byteBackingArray(meta, input);
 				int mask = blobMask(input);//NOTE: the consumer must do their own UTF8 conversion
 				databaseConnection.writeClientId(data,pos,len,mask);
 			}
-			int clientIdIdx = Pipe.takeValue(input);
+			int clientIdIdx = Pipe.takeInt((Pipe<?>) input);
 			databaseConnection.writeClientIdIdx(clientIdIdx);
 			//read the ASCII topic
 			{
-	        	int meta = takeRingByteMetaData(input);
-	        	int len = takeRingByteLen(input);
+	        	int meta = Pipe.takeByteArrayMetaData((Pipe<?>) input);
+	        	int len = Pipe.takeByteArrayLength((Pipe<?>) input);
 	        	int pos = bytePosition(meta, input, len);        		
 				byte[] data = byteBackingArray(meta, input);
 				int mask = blobMask(input);	
@@ -125,11 +125,11 @@ public class OutputStageLowLevelExample extends PronghornStage {
 				databaseConnection.writePayload(Pipe.inputStream(input));
 				
 			}
-			int qos = Pipe.takeValue(input);
+			int qos = Pipe.takeInt((Pipe<?>) input);
 						
 			databaseConnection.writeQOS(qos);
 			
-			Pipe.releaseReads(input);
+			Pipe.releaseReadLock((Pipe<?>) input);
 			
 			//low level API can write multiple message and messages with multiple fragments but it 
 			//becomes more difficult. (That is what the high level API is more commonly used for)
